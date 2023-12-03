@@ -1,0 +1,32 @@
+Create and verify file intergrity with MD5
+==========================================
+
+echo "hello world" > hello.txt
+cat hello.txt
+md5sum hello.txt
+
+# small space will change the hash completely
+echo "hello world " > hello.txt
+md5sum hello.txt
+
+# same file will always create the same hash 
+echo "hello world" > hello.txt
+md5sum hello.txt
+
+
+
+Create and verify file intergrity with SHA2
+===========================================
+
+echo "hello world" > hello.txt
+sha256sum hello.txt
+
+echo "hello world " > hello.txt
+sha256sum hello.txt
+
+sha256sum hello.txt > checksum
+sha256sum --check checksum
+
+echo "hello world 1" > hello1.txt
+sha256sum hello1.txt >> checksum
+sha256sum --check checksum

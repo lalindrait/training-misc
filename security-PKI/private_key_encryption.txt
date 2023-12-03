@@ -1,0 +1,28 @@
+Ecnrypting and decrypting a file using AES256 with salting
+==========================================================
+
+# get the available commands
+openssl
+OpenSSL> help
+
+openssl aes-256-cbc -in hello.txt -out hello-enc.txt
+openssl aes-256-cbc -d -in hello-enc.txt
+
+# print the salt and key
+openssl aes-256-cbc -d -p -in hello-enc.txt
+
+
+# -aes-256-cbc is what you should use for maximum protection or the 128-bit version; the 3DES (Triple DES) got abandoned some time ago, see Triple DES has been deprecated by NIST in 2017, while AES gets accelerated by all modern CPUs by a lot; you can simply verify if your CPU has the AES-NI instruction set for example using grep aes /proc/cpuinfo; win, win
+# -md sha512 is a bit the faster variant of SHA-2 functions family compared to SHA-256 while it might be a bit more secure; win, win, but that likely changes with the new SHA instruction set in modern CPUs
+# -pbkdf2: use PBKDF2 (Password-Based Key Derivation Function 2) algorithm
+# -iter 1000000 is overriding the default count of iterations (which is 10000) for the password
+
+# AES is a block encryption algorithm and thus supports five modes which are as follows:
+    # ECB mode: Electronic Code Book mode
+    # CBC mode: Cipher Block Chaining mode
+    # CFB mode: Cipher Feedback mode
+    # OFB mode: Output Feedback mode
+    # CTR mode: Counter mode
+
+
+

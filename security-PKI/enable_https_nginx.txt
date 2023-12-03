@@ -1,0 +1,91 @@
+Install a self-signed certificate in nginx
+==========================================
+
+cd /etc/nginx/pki
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/pki/nginx.key -out /etc/nginx/pki/nginx.crt
+
+# put the following in to the nginx.conf file
+
+vi /etc/nginx/nginx.conf
+
+    listen 80;
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name  localhost;
+
+    ssl_certificate /etc/nginx/pki/nginx.crt;
+    ssl_certificate_key /etc/nginx/pki/nginx.key;
+    
+    ssl_protocols TLSv1.2 TLSv1.1 TLSv1;
+
+
+systemctl reload nginx
+
+# connect from the browser
+https://192.168.1.111/
+
+
+
+Create a CA 
+=================
+
+
+### create both the root private and the root certificate
+### following create both the private and certtifcate in one command
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout root-key.pem -out root.crt
+
+
+
+Create a sign a keys from the CA
+================================
+
+### create the private key
+openssl genrsa -out server-key.pem 2048
+
+### create the CSR
+openssl req -new -key hellfish.test.key -out hellfish.test.csr
+
+### send it to the CA.
+cp server.csr  CA/
+
+### create a cert config file
+vi root-cert-config.ext
+
+    authorityKeyIdentifier=keyid,issuer
+    basicConstraints=CA:FALSE
+    keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+    subjectAltName = @alt_names
+
+    [alt_names]
+    DNS.1 = mitesp.com
+
+
+
+
+### create the server cert
+openssl x509 -req -in server.csr -CA root.crt -CAkey root-key.pem -CAcreateserial -out server.crt -days 30 -sha256 -extfile root-cert-config.ext
+
+### send the crt back to user
+cp server.crt ../
+
+
+### copy crt and key to the nginx pki directory change nginx tls config and reload
+cp server-key.pem /etc/nginx/pki/
+cp server.crt /etc/nginx/pki/
+
+vi /etc/nginx/nginx.conf
+
+        #ssl_certificate /etc/nginx/pki/nginx.crt;
+        ssl_certificate /etc/nginx/pki/server.crt;
+        #ssl_certificate_key /etc/nginx/pki/nginx.key;
+        ssl_certificate_key /etc/nginx/pki/server-key.pem;
+
+
+systemctl reload nginx
+
+### go to the web site and view the certificate details in the browser
+
+### add the root cert to web browser
+
+
+### browse the website
