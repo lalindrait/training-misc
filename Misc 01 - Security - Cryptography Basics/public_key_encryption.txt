@@ -26,7 +26,7 @@ openssl rsa -in lv-2048-key.pem -outform PEM -pubout
 openssl rsa -in lv-2048-key.pem -outform PEM -pubout -out lv-2048-publickey.pem
 openssl rsa -in lv-4096-key.pem  -outform PEM -pubout -out lv-4096-publickey.pem
 
-### public key size are also different
+### public key sizes are also different
 
 # Visually Inspect Your Key Files
 # It is important to visually inspect you private and 
@@ -43,5 +43,32 @@ openssl x509 -in public.pem -text -noout | grep "Public Key"
 ssh-keygen -lf id_rsa
 ssh-keygen -lf id_rsa.pub
 
+### convert PRM to DEr format
+openssl x509 -in cert.crt -outform DER -out cert.cer
+
+### create a cert fingerprint
+sha1sum cert.cer
+openssl x509  -fingerprint  -in my-cert.cer  
+
+View Certificate Details - Kubernetes
+==========================================
+#To view CA, API Server, ETCD certs and keys
+cd /etc/kubernetes/pki
+ls -l 
+openssl x509 -in apiserver.crt -text -noout
+
+
+
+Acessing k8s API thorugh curl
+==============================
+cat /etc/kubernetes/admin.conf
+# put the data fileds in to a seperate fileds
+
+cat encoded-admin.crt | base64 --decode > admin.crt
+cat encoded-admin.key | base64 --decode > admin.key
+cat encoded-ca.crt | base64 --decode > ca.crt
+
+kubectl cluster-info 
+curl https://192.168.1.231:6443/api/v1/pods --key admin.key --cert admin.crt --cacert ca.crt
 
 
